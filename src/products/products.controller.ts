@@ -12,18 +12,20 @@ import {
 } from '@nestjs/common';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
 
-import { firstValueFrom } from 'rxjs';
+import { catchError } from 'rxjs';
 
 import { PaginationDto } from 'src/common';
 import { PRODUCT_SERVICE } from 'src/config';
+import { CreateProductDto } from './dto/create-product.dto';
+import { UpdateProductDto } from './dto/update-product.dto';
 
 @Controller('products')
 export class ProductsController {
   constructor(@Inject(PRODUCT_SERVICE) private productsClient: ClientProxy) {}
 
   @Post()
-  create() {
-    return 'Create a new product';
+  create(@Body() productDto: CreateProductDto) {
+    return this.productsClient.send({ cmd: 'create_product' }, productDto);
   }
 
   @Get()
@@ -36,27 +38,33 @@ export class ProductsController {
 
   @Get(':id')
   async findOne(@Param('id', ParseUUIDPipe) id: string) {
-    try {
-      const product = await firstValueFrom(
-        this.productsClient.send({ cmd: 'find_one_product' }, { id }),
-      );
-
-      return product;
-    } catch (error) {
-      throw new RpcException(error);
-    }
+    return this.productsClient.send({ cmd: 'find_one_product' }, { id }).pipe(
+      catchError((err) => {
+        throw new RpcException(err);
+      }),
+    );
   }
 
   @Patch(':id')
-  update(@Param('id', ParseUUIDPipe) id: string, @Body() product: any) {
-    return {
-      id,
-      product,
-    };
+  update(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() product: UpdateProductDto,
+  ) {
+    return this.productsClient
+      .send({ cmd: 'update_product' }, { ...product, id: id.toString() })
+      .pipe(
+        catchError((err) => {
+          throw new RpcException(err);
+        }),
+      );
   }
 
   @Delete(':id')
   delete(@Param('id', ParseUUIDPipe) id: string) {
-    return { id };
+    return this.productsClient.send({ cmd: 'delete_product' }, { id }).pipe(
+      catchError((err) => {
+        throw new RpcException(err);
+      }),
+    );
   }
 }
