@@ -21,7 +21,9 @@ import { UpdateProductDto } from './dto/update-product.dto';
 
 @Controller('products')
 export class ProductsController {
-  constructor(@Inject(PRODUCT_SERVICE) private productsClient: ClientProxy) {}
+  constructor(
+    @Inject(PRODUCT_SERVICE) private readonly productsClient: ClientProxy,
+  ) {}
 
   @Post()
   create(@Body() productDto: CreateProductDto) {
