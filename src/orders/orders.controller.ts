@@ -7,6 +7,7 @@ import {
   Inject,
   ParseUUIDPipe,
   Query,
+  Patch,
 } from '@nestjs/common';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { ORDERS_SERVICE } from 'src/config';
@@ -54,5 +55,19 @@ export class OrdersController {
         throw new RpcException(err);
       }),
     );
+  }
+
+  @Patch(':id')
+  changeStatus(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() statusDto: StatusDto,
+  ) {
+    return this.ordersClient
+      .send('changeOrderStatus', { id, ...statusDto })
+      .pipe(
+        catchError((err) => {
+          throw new RpcException(err);
+        }),
+      );
   }
 }
