@@ -1,18 +1,11 @@
-import { IsEnum, IsNumber, IsOptional, IsPositive } from 'class-validator';
-import { OrderStatus, OrderStatusList } from '../enum';
+import { ArrayMinSize, IsArray, ValidateNested } from 'class-validator';
+import { Type } from 'class-transformer';
+import { OrderItemDto } from './order-item.dto';
 
 export class CreateOrderDto {
-  @IsNumber()
-  @IsPositive()
-  totalAmount: number;
-
-  @IsNumber()
-  @IsPositive()
-  totalItems: number;
-
-  @IsEnum(OrderStatusList, {
-    message: `Posible order status value are: ${OrderStatusList}`,
-  })
-  @IsOptional()
-  status: OrderStatus = OrderStatus.PENDING;
+  @IsArray()
+  @ArrayMinSize(1)
+  @ValidateNested({ each: true })
+  @Type(() => OrderItemDto)
+  items: OrderItemDto[];
 }
