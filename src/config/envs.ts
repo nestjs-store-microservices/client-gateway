@@ -9,19 +9,21 @@ interface EnvVars {
 
   HOST_ORDERS_MS: string;
   PORT_ORDERS_MS: number;
+
+  NATS_SERVERS: string[];
 }
 
 const envsScheme = joi
   .object({
     PORT: joi.number().required(),
-    HOST_PRODUCT_MS: joi.string().required(),
-    PORT_PRODUCT_MS: joi.number().required(),
-    HOST_ORDERS_MS: joi.string().required(),
-    PORT_ORDERS_MS: joi.number().required(),
+    NATS_SERVERS: joi.array().items(joi.string()).required(),
   })
   .unknown(true);
 
-const { error, value } = envsScheme.validate(process.env);
+const { error, value } = envsScheme.validate({
+  ...process.env,
+  NATS_SERVERS: process.env.NATS_SERVERS?.split(';'),
+});
 
 if (error) {
   throw new Error(`Config validation error: ${error.message}`);
@@ -31,10 +33,5 @@ const envVars: EnvVars = value;
 
 export const envs = {
   port: envVars.PORT,
-
-  host_product: envVars.HOST_PRODUCT_MS,
-  port_product: envVars.PORT_PRODUCT_MS,
-
-  host_order: envVars.HOST_ORDERS_MS,
-  port_order: envVars.PORT_ORDERS_MS,
+  natsServers: envVars.NATS_SERVERS,
 };
