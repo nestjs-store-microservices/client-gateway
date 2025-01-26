@@ -11,13 +11,12 @@ import {
   Query,
 } from '@nestjs/common';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
-
 import { catchError } from 'rxjs';
 
+import { NATS_SERVICE } from 'src/config';
 import { PaginationDto } from 'src/common';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
-import { NATS_SERVICE } from 'src/config';
 
 @Controller('products')
 export class ProductsController {
