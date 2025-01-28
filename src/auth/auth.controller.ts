@@ -30,11 +30,6 @@ export class AuthController {
     );
   }
 
-  @Get('logout')
-  logout() {
-    return this.client.send('auth.logiut.user', {});
-  }
-
   @UseGuards(AuthGuard)
   @Get('verify')
   verify(@User() user: CurrentUser, @Token() token: string) {
