@@ -1,12 +1,14 @@
 import {
   CanActivate,
   ExecutionContext,
+  HttpStatus,
   Inject,
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
-import { ClientProxy } from '@nestjs/microservices';
+import { ClientProxy, RpcException } from '@nestjs/microservices';
 import { Request } from 'express';
+
 import { firstValueFrom } from 'rxjs';
 
 import { NATS_SERVICE } from 'src/config';
@@ -28,10 +30,21 @@ export class AuthGuard implements CanActivate {
         this.client.send('auth.verify.token', token),
       );
 
+      if (!user.isActive) {
+        throw new RpcException({
+          status: HttpStatus.UNAUTHORIZED,
+          message: 'User is not active',
+        });
+      }
+
       request['user'] = user;
       request['token'] = tokenJwt;
-    } catch {
-      throw new UnauthorizedException();
+    } catch (err) {
+      if (err instanceof RpcException) {
+        throw err;
+      }
+
+      throw new UnauthorizedException(err);
     }
 
     return true;
