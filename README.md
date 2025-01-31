@@ -22,3 +22,11 @@ docker run -d --name nats-main -p 4222:4222 -p 6222:6222 -p 8222:8222 nats
 ```
 docker run -d --name nats-main -p 4222:4222 -p 6222:6222 -p 8222:8222 nats
 ```
+
+## Prod: Build docker image for production
+
+```
+docker build -f dockerfile.prod -t store-client-gateway .
+
+docker compose -f docker-compose.prod.yml build
+```
