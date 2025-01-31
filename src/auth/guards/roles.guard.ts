@@ -20,6 +20,11 @@ export class RolesGuard implements CanActivate {
       context.getHandler(),
     );
 
+    console.log(validRoles);
+
+    if (!validRoles) return true;
+    if (validRoles.length === 0) return true;
+
     if (!user) {
       throw new RpcException({
         status: HttpStatus.UNAUTHORIZED,
@@ -35,7 +40,7 @@ export class RolesGuard implements CanActivate {
 
     throw new RpcException({
       status: HttpStatus.FORBIDDEN,
-      message: `User ${user.fullName} need a valid role`,
+      message: `User: ${user.fullName}, need a valid role`,
     });
   }
 }
