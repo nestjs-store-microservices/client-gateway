@@ -15,21 +15,26 @@ import { ClientProxy, RpcException } from '@nestjs/microservices';
 import { catchError } from 'rxjs';
 import { CreateOrderDto, OrderPaginationDto, StatusDto } from './dto';
 import { PaginationDto } from 'src/common';
+import { Auth } from 'src/auth/decorators';
+import { ValidRoles } from 'src/auth/interfaces';
 
 @Controller('orders')
 export class OrdersController {
   constructor(@Inject(NATS_SERVICE) private readonly client: ClientProxy) {}
 
+  @Auth(ValidRoles.admin)
   @Post()
   create(@Body() createOrderDto: CreateOrderDto) {
     return this.client.send('createOrder', createOrderDto);
   }
 
+  @Auth()
   @Get()
   findAll(@Query() pagination: OrderPaginationDto) {
     return this.client.send('findAllOrders', pagination);
   }
 
+  @Auth()
   @Get(':status')
   findAllByStatus(
     @Param() status: StatusDto,
@@ -45,6 +50,7 @@ export class OrdersController {
     }
   }
 
+  @Auth()
   @Get('id/:id')
   findOne(@Param('id', ParseUUIDPipe) id: string) {
     return this.client.send('findOneOrder', { id }).pipe(
@@ -54,6 +60,7 @@ export class OrdersController {
     );
   }
 
+  @Auth(ValidRoles.admin)
   @Patch(':id')
   changeStatus(
     @Param('id', ParseUUIDPipe) id: string,
